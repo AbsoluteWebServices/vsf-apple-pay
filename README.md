@@ -80,10 +80,8 @@ Add the config to your api config.
 ```json
 "extensions":{
    "apple-pay": {
-     "applePay": {
-      "merchantId": "merchant.com.example.mystore",
-      "merchantName": "Example merchant name"
-    }
+     "merchantId": "merchant.com.example.mystore",
+     "merchantName": "Example merchant name"
   }
 ```
 

@@ -32,7 +32,7 @@ Add following settings to your config file.
     "supportedNetworks": ["visa", "masterCard", "amex", "discover"],
     "merchantCapabilities": ["supports3DS", "supportsCredit", "supportsDebit", "supportsEMV"],
     "endpoint": {
-      "paymentSession": "https://demo.vuetique.io/api/ext/apple-pay/paymentSession"
+      "paymentSession": "http://localhost:8080/api/ext/apple-pay/paymentSession"
     }
   },
 ```
@@ -66,3 +66,25 @@ export default {
   @payment-authorized="placeOrder"
 />
 ```
+
+## API extension
+
+Install additional extension for `vue-storefront-api`:
+
+```shell
+cp -f ./vue-storefront/src/modules/vsf-apple-pay/API/apple-pay ./vue-storefront-api/src/api/extensions/
+```
+
+Add the config to your api config.
+
+```json
+"extensions":{
+   "apple-pay": {
+     "applePay": {
+      "merchantId": "merchant.com.example.mystore",
+      "merchantName": "Example merchant name"
+    }
+  }
+```
+
+Create a [merchant identity certificate](https://help.apple.com/developer-account/#/dev1731126fb?sub=dev17ad0bdc0) and place it to `./vue-storefront-api/config/certificates/apple-pay-merchant-identity-certificate.cer`

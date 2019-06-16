@@ -1,0 +1,1 @@
+export const SET_PAYMENT_TOKEN = 'SET_PAYMENT_TOKEN'

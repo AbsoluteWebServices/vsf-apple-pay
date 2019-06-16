@@ -1,0 +1,32 @@
+{
+  "name": "@vue-storefront/apple-pay",
+  "version": "0.1.0",
+  "description": "The Apple Pay payment module.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AbsoluteWebServices/vsf-apple-pay.git"
+  },
+  "keywords": [
+    "apple-pay",
+    "vsf-apple-pay",
+    "vue-storefront-apple-pay",
+    "vue-storefront",
+    "divanteltd/vue-storefront"
+  ],
+  "author": "Dmitry Kozachek <dmitryk@absoluteweb.com> and contributors",
+  "maintainers": [],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/AbsoluteWebServices/vsf-apple-pay/issues"
+  },
+  "homepage": "https://github.com/AbsoluteWebServices/vsf-apple-pay#readme",
+  "dependencies": {
+  }
+}

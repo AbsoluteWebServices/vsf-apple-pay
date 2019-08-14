@@ -70,7 +70,7 @@ export default {
       }
     },
     totals () {
-      return rootStore.getters['cart/totals']
+      return rootStore.getters['cart/getTotals']
     },
     shippingMethods () {
       return rootStore.getters['shipping/shippingMethods']

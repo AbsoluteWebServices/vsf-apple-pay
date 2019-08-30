@@ -1,6 +1,7 @@
 import { ApplePayState } from '../types/ApplePayState'
 import { ActionTree } from 'vuex'
 import config from 'config'
+import fetch from 'isomorphic-fetch'
 
 export const actions: ActionTree<ApplePayState, any> = {
   requestPaymentSession ({}, validationURL): Promise<Response> {

@@ -1,10 +1,14 @@
 {
-  "name": "@vue-storefront/apple-pay",
-  "version": "0.1.0",
+  "name": "@absolute-web/vsf-apple-pay",
+  "version": "0.0.1",
   "description": "The Apple Pay payment module.",
-  "main": "index.js",
+  "main": "lib/index.cjs.js",
+  "module": "lib/index.es.js",
+  "server": "server/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "rimraf lib server && yarn run rollup -c",
+    "dev": "rimraf lib server && yarn run rollup -c -w"
   },
   "publishConfig": {
     "access": "public"
@@ -28,5 +32,24 @@
   },
   "homepage": "https://github.com/AbsoluteWebServices/vsf-apple-pay#readme",
   "dependencies": {
-  }
+    "@vue-storefront/core": "^2.3.3",
+    "axios": "^0.21.1",
+    "vue-demi": "^0.9.1"
+  },
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^13.0.0",
+    "rimraf": "^3.0.2",
+    "rollup": "^2.52.1",
+    "rollup-plugin-typescript2": "^0.30.0",
+    "typescript": "^4.3.3"
+  },
+  "peerDependencies": {
+    "@vue/composition-api": "1.0.0-beta.21",
+    "vue": "^2.0.0 || >=3.0.0-rc.0"
+  },
+  "files": [
+    "lib/**/*",
+    "nuxt/**/*",
+    "server/**/*"
+  ]
 }

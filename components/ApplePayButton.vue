@@ -1,22 +1,18 @@
 <template>
   <div v-if="canMakePayments" :class="buttonClasses" @click="onClick">
-    <template v-if="type = 'buy'">
-      <span class="text">{{ t('Buy with') }}</span>
-      <span class="logo"/>
-    </template>
+    <slot :type="type">
+      <template v-if="type = 'buy'">
+        <span class="text">{{ $t('Buy with') }}</span>
+        <span class="logo"/>
+      </template>
+    </slot>
   </div>
 </template>
 
 <script>
-import config from 'config'
-import i18n from '@vue-storefront/i18n'
-import rootStore from '@vue-storefront/core/store'
-import { currentStoreView } from '@vue-storefront/core/lib/multistore'
-import { KEY } from '../index'
-import { SET_PAYMENT_TOKEN } from '../store/mutation-types'
-
-// const ENV_TEST = 'Sandbox'
-// const ENV_PROD = 'Production'
+import { ref, computed, onMounted } from '@vue/composition-api';
+import { useVSFContext } from '@vue-storefront/core';
+import { usePaymentSession } from '@absolute-web/vsf-apple-pay';
 
 export default {
   name: 'ApplePayButton',
@@ -46,134 +42,81 @@ export default {
       type: Boolean,
       required: false,
       default: false
+    },
+    totals: {
+      type: Object,
+      required: true,
     }
   },
-  data () {
-    return {
-      canMakePayments: false,
-      session: null
-    }
-  },
-  mounted () {
-    if (config[KEY]) {
-      if (window.ApplePaySession) {
-        this.setupButton()
-      }
-    }
-  },
-  computed: {
-    buttonClasses () {
-      if (this.type === 'buy') {
-        return `apple-pay-button-with-text apple-pay-button-${this.color}${this.withLine ? '-with-line' : ''}-with-text`
+  setup(props, { emit }) {
+    const { $applepay } = useVSFContext();
+    const { paymentSession, load: loadPaymentSession, error } = usePaymentSession();
+
+    const {
+      merchantId,
+      currencyCode,
+      countryCode,
+      supportedNetworks,
+      merchantCapabilities,
+    } = $applepay.config;
+    const canMakePayments = ref(false);
+    const session = ref(null);
+    const buttonClasses = computed(() => {
+      if (props.type === 'buy') {
+        return `apple-pay-button-with-text apple-pay-button-${props.color}${props.withLine ? '-with-line' : ''}-with-text`
       } else {
-        return `apple-pay-button apple-pay-${this.type}-button apple-pay-button-${this.color}${this.withLine ? '-with-line' : ''}`
+        return `apple-pay-button apple-pay-${props.type}-button apple-pay-button-${props.color}${props.withLine ? '-with-line' : ''}`
       }
-    },
-    totals () {
-      return rootStore.getters['cart/getTotals']
-    },
-    shippingMethods () {
-      return rootStore.getters['shipping/shippingMethods']
-    },
-    availableShippingMethods () {
-      return this.shippingMethods.filter(method => method.available)
-    }
-  },
-  methods: {
-    t (text) {
-      return i18n.t(text)
-    },
-    getLineItems () {
+    });
+
+    const lineItems = computed(() => {
       const lineItems = []
 
-      this.totals.forEach(totals => {
-        if (totals.code !== 'grand_total') {
-          lineItems.push({
-            label: totals.title,
-            type: 'final',
-            amount: totals.value.toFixed(2)
-          })
-        }
-      })
+      for (const key in props.totals) {
+        if (Object.hasOwnProperty.call(props.totals, key)) {
+          const amount = props.totals[key];
 
-      return lineItems
-    },
-    getShippingMethods () {
-      const shippingMethods = []
-
-      this.availableShippingMethods.forEach(method => {
-        shippingMethods.push({
-          identifier: method.method_code,
-          label: method.method_title,
-          amount: method.amount.toFixed(2)
-        })
-      })
-
-      return shippingMethods
-    },
-    setupButton () {
-      let merchantIdentifier = config[KEY].merchantId
-
-      window.ApplePaySession.canMakePaymentsWithActiveCard(merchantIdentifier)
-        .then(canMakePayments => {
-          if (canMakePayments) {
-            console.log('ApplePayButton canMakePayments')
-            this.canMakePayments = true
-          } else {
-            // Check for the existence of the openPaymentSetup method.
-            if (window.ApplePaySession.openPaymentSetup) {
-              // Display the Set up Apple Pay Button here…
-              window.ApplePaySession.openPaymentSetup(merchantIdentifier)
-                .then(success => {
-                  if (success) {
-                    // Open payment setup successful
-                    console.log('Open payment setup successful')
-                  } else {
-                    // Open payment setup failed
-                    console.error('Open payment setup failed')
-                  }
-                })
-                .catch(error => {
-                  // Open payment setup error handling
-                  console.error(error)
-                })
-            }
+          if (key !== 'total') {
+            lineItems.push({
+              label: key,
+              type: 'final',
+              amount: amount.toFixed(2)
+            })
           }
-        })
-    },
-    onClick (e) {
-      console.log('ApplePayButton.onClick')
-      if (!this.disabled) {
-        const storeView = currentStoreView()
-        const total = this.totals.find(item => item.code === 'grand_total').value
-
-        if (total > 0) {
-          let request = {
-            countryCode: storeView.i18n.defaultCountry,
-            currencyCode: storeView.i18n.currencyCode,
-            supportedNetworks: config[KEY].supportedNetworks,
-            merchantCapabilities: config[KEY].merchantCapabilities,
-            total: {
-              label: config[KEY].merchantName,
-              amount: total.toFixed(2)
-            },
-            lineItems: this.getLineItems(),
-            shippingMethods: this.getShippingMethods()
-          }
-          this.session = new window.ApplePaySession(3, request)
-          this.session.onvalidatemerchant = this.onValidateMerchant
-          this.session.onpaymentauthorized = this.onPaymentAuthorized
-          this.session.oncancel = this.onCancel
-          // this.session.onshippingmethodselected = this.onShippingMethodSelected
-          // this.session.onshippingcontactselected = this.onShippingContactSelected
-          // this.session.onpaymentmethodselected = this.onPaymentMethodSelected
-          this.session.begin()
-          console.log('ApplePaySession.begin() called')
         }
       }
-    },
-    onValidateMerchant (event) {
-      console.log('ApplePayButton.onValidateMerchant', event)
+
+      return lineItems
+    });
+
+    const total = computed(() => props.totals?.total || 0);
+
+    const setupButton = async () => {
+      try {
+        const _canMakePayments = await window.ApplePaySession.canMakePaymentsWithActiveCard(merchantId)
+
+        if (_canMakePayments) {
+          canMakePayments.value = true
+        } else {
+          // Check for the existence of the openPaymentSetup method.
+          if (window.ApplePaySession.openPaymentSetup) {
+            // Display the Set up Apple Pay Button here…
+            const result = await window.ApplePaySession.openPaymentSetup(merchantId)
+
+            if (result) {
+              // Open payment setup successful
+            } else {
+              // Open payment setup failed
+              emit('error', 'Open payment setup failed')
+            }
+          }
+        }
+      } catch (err) {
+        emit('error', err)
+      }
+    };
+
+    const onValidateMerchant = async (event) => {
       // 1. You call your server, passing it the URL from the event’s validationURL property.
       // 2. Your server uses the validation URL to request a session from the Apple Pay server,
       //    as described in Requesting an Apple Pay Payment Session.
@@ -183,41 +126,75 @@ export default {
       //    completeMerchantValidation method. You can use the merchant session object a single time.
       //    It expires five minutes after it is created.
 
-      rootStore.dispatch(KEY + '/requestPaymentSession', event.validationURL)
-        .then(session => {
-          console.log('ApplePayButton.requestPaymentSession', session)
-          this.session.completeMerchantValidation(session)
-        })
-    },
-    onPaymentAuthorized (event) {
-      console.log('ApplePayButton.onPaymentAuthorized', event)
+      try {
+        await loadPaymentSession({ validationURL: event.validationURL });
+
+        if (error.value.load) {
+          throw error.value.load;
+        }
+
+        session.value.completeMerchantValidation(paymentSession.value)
+      } catch (err) {
+        emit('error', err)
+      }
+    };
+
+    const onPaymentAuthorized = (event) => {
       // The onpaymentauthorized function must complete the payment
       // and respond by calling completePayment before the 30 second timeout,
       // after which a message appears stating that the payment could not be completed.
 
-      const paymentData = event.payment
-      const paymentToken = paymentData.token
+      const paymentToken = event.payment?.token;
 
-      rootStore.commit(KEY + '/' + SET_PAYMENT_TOKEN, paymentToken)
-      this.$emit('payment-authorized', paymentData)
+      if (paymentToken) {
+        session.value.completePayment({
+          status: window.ApplePaySession.STATUS_SUCCESS
+        })
+        emit('success', paymentToken)
+      } else {
+        session.value.completePayment({
+          status: window.ApplePaySession.STATUS_FAILURE
+        })
+        emit('error', event)
+      }
+    };
 
-      // if (orderPaid) {
-      //   this.session.completePayment({
-      //     status: window.ApplePaySession.STATUS_SUCCESS
-      //   })
-      // } else {
-      //   this.session.completePayment({
-      //     status: window.ApplePaySession.STATUS_FAILURE,
-      //     errors: [
-      //       new window.ApplePayError("shippingContactInvalid", "postalCode", "ZIP Code is invalid")
-      //     ]
-      //   })
-      // }
-    },
-    onCancel (event) {
-      console.log('ApplePayButton.onCancel', event)
-      console.error('onCancel')
-      this.session.abort()
+    const onCancel = (event) => {
+      session.value.abort()
+      emit('error', 'Aborted')
+    };
+
+    const onClick = (e) => {
+      if (!props.disabled) {
+          const request = {
+            countryCode,
+            currencyCode,
+            supportedNetworks,
+            merchantCapabilities,
+            total: {
+              label: 'Total',
+              amount: total.value.toFixed(2)
+            },
+            lineItems: lineItems.value
+          }
+          session.value = new window.ApplePaySession(3, request)
+          session.value.onvalidatemerchant = onValidateMerchant
+          session.value.onpaymentauthorized = onPaymentAuthorized
+          session.value.oncancel = onCancel
+          session.value.begin()
+      }
+    };
+
+    onMounted(() => {
+      if (merchantId && window.ApplePaySession) {
+        setupButton()
+      }
+    });
+
+    return {
+      canMakePayments,
+      buttonClasses,
+      onClick,
     }
   }
 }
@@ -228,6 +205,7 @@ export default {
   /* Template for logo only button (height independent). */
   .apple-pay-button {
     display: inline-block;
+    cursor: pointer;
     -webkit-appearance: -apple-pay-button;
   }
   .apple-pay-button-black {
@@ -245,6 +223,7 @@ export default {
   /* Template for "Buy with" button with height: 32 */
   .apple-pay-button-with-text {
     display: inline-block;
+    cursor: pointer;
     -webkit-appearance: -apple-pay-button;
     -apple-pay-button-type: buy;
   }

@@ -14,9 +14,15 @@ import { ref, computed, onMounted } from '@vue/composition-api';
 import { useVSFContext } from '@vue-storefront/core';
 import { usePaymentSession } from '@absolute-web/vsf-apple-pay';
 
+const lineItemsToDisplay = ['subtotal', 'shipping', 'tax'];
+
 export default {
   name: 'ApplePayButton',
   props: {
+    totals: {
+      type: Object,
+      required: true,
+    },
     type: {
       type: String,
       required: false,
@@ -42,10 +48,6 @@ export default {
       type: Boolean,
       required: false,
       default: false
-    },
-    totals: {
-      type: Object,
-      required: true,
     }
   },
   setup(props, { emit }) {
@@ -76,7 +78,7 @@ export default {
         if (Object.hasOwnProperty.call(props.totals, key)) {
           const amount = props.totals[key];
 
-          if (key !== 'total') {
+          if (lineItemsToDisplay.includes(key)) {
             lineItems.push({
               label: key,
               type: 'final',

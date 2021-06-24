@@ -206,7 +206,7 @@ export default {
 @supports (-webkit-appearance: -apple-pay-button) {
   /* Template for logo only button (height independent). */
   .apple-pay-button {
-    display: inline-block;
+    display: block;
     cursor: pointer;
     -webkit-appearance: -apple-pay-button;
   }
@@ -224,7 +224,7 @@ export default {
   }
   /* Template for "Buy with" button with height: 32 */
   .apple-pay-button-with-text {
-    display: inline-block;
+    display: block;
     cursor: pointer;
     -webkit-appearance: -apple-pay-button;
     -apple-pay-button-type: buy;
@@ -265,7 +265,7 @@ export default {
 @supports not (-webkit-appearance: -apple-pay-button) {
   /* Template for logo only button (height independent). */
   .apple-pay-button {
-    display: inline-block;
+    display: block;
     background-size: 100% 60%;
     background-repeat: no-repeat;
     background-position: 50% 50%;
@@ -292,7 +292,7 @@ export default {
   /* Template for "Buy with" button with height: 32 */
   .apple-pay-button-with-text {
     --apple-pay-scale: 1; /* (height / 32) */
-    display: inline-flex;
+    display: flex;
     justify-content: center;
     font-size: 12px;
     border-radius: 5px;

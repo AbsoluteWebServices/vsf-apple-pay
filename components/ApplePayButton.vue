@@ -168,6 +168,7 @@ export default {
 
     const onClick = (e) => {
       if (!props.disabled) {
+          emit('click');
           const request = {
             countryCode,
             currencyCode,

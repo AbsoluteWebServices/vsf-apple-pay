@@ -6,6 +6,7 @@
   "module": "lib/index.es.js",
   "server": "server/index.js",
   "types": "lib/index.d.ts",
+  "components": "components/index.js",
   "scripts": {
     "build": "rimraf lib server && yarn run rollup -c",
     "dev": "rimraf lib server && yarn run rollup -c -w"

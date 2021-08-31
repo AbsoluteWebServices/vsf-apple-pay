@@ -33,7 +33,7 @@
   },
   "homepage": "https://github.com/AbsoluteWebServices/vsf-apple-pay#readme",
   "dependencies": {
-    "@vue-storefront/core": "^2.3.3",
+    "@vue-storefront/core": "~2.4.1",
     "axios": "^0.21.1",
     "vue-demi": "latest"
   },

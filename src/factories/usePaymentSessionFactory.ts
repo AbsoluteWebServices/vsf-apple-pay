@@ -32,7 +32,7 @@ export function usePaymentSessionFactory(
         loading.value = true;
         paymentSession.value = await _factoryParams.load(params);
         error.value.load = null;
-      } catch (err) {
+      } catch (err: any) {
         error.value.load = err;
         Logger.error(`usePaymentSession/${ssrKey}/load`, err);
       } finally {

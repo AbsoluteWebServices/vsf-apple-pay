@@ -24,7 +24,7 @@ export default async (
     }
 
     return response.data;
-  } catch (err) {
+  } catch (err: any) {
     if (err.response) {
       throw err.response.data;
     } else if (err.request) {

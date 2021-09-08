@@ -1,23 +1,21 @@
 <template>
   <div v-if="canMakePayments" :class="buttonClasses" @click="onClick">
     <slot :type="type">
-      <template v-if="type = 'buy'">
-        <span class="text">{{ $t('Buy with') }}</span>
-        <span class="logo"/>
-      </template>
+      <span v-if="type === 'buy'" class="text">{{ $t("Buy with") }}</span>
+      <span class="logo" />
     </slot>
   </div>
 </template>
 
 <script>
-import { ref, computed, onMounted } from '@vue/composition-api';
-import { useVSFContext } from '@vue-storefront/core';
-import { usePaymentSession } from '@absolute-web/vsf-apple-pay';
+import { ref, computed, onMounted } from "@vue/composition-api";
+import { useVSFContext } from "@vue-storefront/core";
+import { usePaymentSession } from "@absolute-web/vsf-apple-pay";
 
-const lineItemsToDisplay = ['subtotal', 'shipping', 'tax'];
+const lineItemsToDisplay = ["subtotal", "shipping", "tax"];
 
 export default {
-  name: 'ApplePayButton',
+  name: "ApplePayButton",
   props: {
     totals: {
       type: Object,
@@ -26,33 +24,47 @@ export default {
     type: {
       type: String,
       required: false,
-      default: 'buy',
+      default: "buy",
       validator: function (value) {
-        return ['plain', 'buy', 'set-up', 'donate', 'check-out', 'book', 'subscribe'].indexOf(value) !== -1
-      }
+        return (
+          [
+            "plain",
+            "buy",
+            "set-up",
+            "donate",
+            "check-out",
+            "book",
+            "subscribe",
+          ].indexOf(value) !== -1
+        );
+      },
     },
     color: {
       type: String,
       required: false,
-      default: 'black',
+      default: "black",
       validator: function (value) {
-        return ['black', 'white'].indexOf(value) !== -1
-      }
+        return ["black", "white"].indexOf(value) !== -1;
+      },
     },
     withLine: {
       type: Boolean,
       required: false,
-      default: false
+      default: false,
     },
     disabled: {
       type: Boolean,
       required: false,
-      default: false
-    }
+      default: false,
+    },
   },
   setup(props, { emit }) {
     const { $applepay } = useVSFContext();
-    const { paymentSession, load: loadPaymentSession, error } = usePaymentSession();
+    const {
+      paymentSession,
+      load: loadPaymentSession,
+      error,
+    } = usePaymentSession();
 
     const {
       merchantId,
@@ -64,15 +76,21 @@ export default {
     const canMakePayments = ref(false);
     const session = ref(null);
     const buttonClasses = computed(() => {
-      if (props.type === 'buy') {
-        return `apple-pay-button-with-text apple-pay-button-${props.color}${props.withLine ? '-with-line' : ''}-with-text`
+      if (props.type === "buy") {
+        return `apple-pay-button-with-text apple-pay-button-${props.color}${
+          props.withLine ? "-with-line" : ""
+        }-with-text`;
       } else {
-        return `apple-pay-button apple-pay-${props.type}-button apple-pay-button-${props.color}${props.withLine ? '-with-line' : ''}`
+        return `apple-pay-button apple-pay-${
+          props.type
+        }-button apple-pay-button-${props.color}${
+          props.withLine ? "-with-line" : ""
+        }`;
       }
     });
 
     const lineItems = computed(() => {
-      const lineItems = []
+      const lineItems = [];
 
       for (const key in props.totals) {
         if (Object.hasOwnProperty.call(props.totals, key)) {
@@ -81,40 +99,29 @@ export default {
           if (lineItemsToDisplay.includes(key)) {
             lineItems.push({
               label: key,
-              type: 'final',
-              amount: amount.toFixed(2)
-            })
+              type: "final",
+              amount: amount.toFixed(2),
+            });
           }
         }
       }
 
-      return lineItems
+      return lineItems;
     });
 
     const total = computed(() => props.totals?.total || 0);
 
     const setupButton = async () => {
       try {
-        const _canMakePayments = await window.ApplePaySession.canMakePaymentsWithActiveCard(merchantId)
+        const _canMakePayments = await window.ApplePaySession.canMakePayments(
+          merchantId
+        );
 
         if (_canMakePayments) {
-          canMakePayments.value = true
-        } else {
-          // Check for the existence of the openPaymentSetup method.
-          if (window.ApplePaySession.openPaymentSetup) {
-            // Display the Set up Apple Pay Button here…
-            const result = await window.ApplePaySession.openPaymentSetup(merchantId)
-
-            if (result) {
-              // Open payment setup successful
-            } else {
-              // Open payment setup failed
-              emit('error', 'Open payment setup failed')
-            }
-          }
+          canMakePayments.value = true;
         }
       } catch (err) {
-        emit('error', err)
+        emit("error", err);
       }
     };
 
@@ -135,9 +142,9 @@ export default {
           throw error.value.load;
         }
 
-        session.value.completeMerchantValidation(paymentSession.value)
+        session.value.completeMerchantValidation(paymentSession.value);
       } catch (err) {
-        emit('error', err)
+        emit("error", err);
       }
     };
 
@@ -150,47 +157,48 @@ export default {
 
       if (paymentToken) {
         session.value.completePayment({
-          status: window.ApplePaySession.STATUS_SUCCESS
-        })
-        emit('success', paymentToken)
+          status: window.ApplePaySession.STATUS_SUCCESS,
+        });
+        emit("success", paymentToken);
       } else {
         session.value.completePayment({
-          status: window.ApplePaySession.STATUS_FAILURE
-        })
-        emit('error', event)
+          status: window.ApplePaySession.STATUS_FAILURE,
+        });
+        emit("error", event);
       }
     };
 
     const onCancel = (event) => {
-      session.value.abort()
-      emit('error', 'Aborted')
+      session.value.abort();
+      emit("error", "Aborted");
     };
 
-    const onClick = (e) => {
-      if (!props.disabled) {
-          emit('click');
-          const request = {
-            countryCode,
-            currencyCode,
-            supportedNetworks,
-            merchantCapabilities,
-            total: {
-              label: 'Total',
-              amount: total.value.toFixed(2)
-            },
-            lineItems: lineItems.value
-          }
-          session.value = new window.ApplePaySession(3, request)
-          session.value.onvalidatemerchant = onValidateMerchant
-          session.value.onpaymentauthorized = onPaymentAuthorized
-          session.value.oncancel = onCancel
-          session.value.begin()
+    const onClick = async (e) => {
+      if (props.disabled) {
+        return;
       }
+      emit("click");
+      const request = {
+        countryCode,
+        currencyCode,
+        supportedNetworks,
+        merchantCapabilities,
+        total: {
+          label: "Total",
+          amount: total.value.toFixed(2),
+        },
+        lineItems: lineItems.value,
+      };
+      session.value = new window.ApplePaySession(3, request);
+      session.value.onvalidatemerchant = onValidateMerchant;
+      session.value.onpaymentauthorized = onPaymentAuthorized;
+      session.value.oncancel = onCancel;
+      session.value.begin();
     };
 
     onMounted(() => {
       if (merchantId && window.ApplePaySession) {
-        setupButton()
+        setupButton();
       }
     });
 
@@ -198,9 +206,9 @@ export default {
       canMakePayments,
       buttonClasses,
       onClick,
-    }
-  }
-}
+    };
+  },
+};
 </script>
 
 <style scoped>
@@ -288,7 +296,7 @@ export default {
   .apple-pay-button-white-with-line {
     background-image: -webkit-named-image(apple-pay-logo-black);
     background-color: white;
-    border: .5px solid black;
+    border: 0.5px solid black;
   }
   /* Template for "Buy with" button with height: 32 */
   .apple-pay-button-with-text {
@@ -314,7 +322,7 @@ export default {
   .apple-pay-button-white-with-line-with-text {
     background-color: white;
     color: black;
-    border: .5px solid black;
+    border: 0.5px solid black;
   }
   .apple-pay-button-with-text.apple-pay-button-black-with-text > .logo {
     background-image: -webkit-named-image(apple-pay-logo-white);
@@ -324,7 +332,8 @@ export default {
     background-image: -webkit-named-image(apple-pay-logo-black);
     background-color: white;
   }
-  .apple-pay-button-with-text.apple-pay-button-white-with-line-with-text > .logo {
+  .apple-pay-button-with-text.apple-pay-button-white-with-line-with-text
+    > .logo {
     background-image: -webkit-named-image(apple-pay-logo-black);
     background-color: white;
   }

@@ -11,26 +11,10 @@ export default async (
   const { merchantId, merchantName, domainName } = config;
   const validationURL = params.validationURL;
 
-  try {
-    const response = await client.post(validationURL, {
-      merchantIdentifier: merchantId,
-      displayName: merchantName,
-      initiative: 'web',
-      initiativeContext: domainName
-    });
-
-    if (response.status !== 200) {
-      throw response.data;
-    }
-
-    return response.data;
-  } catch (err: any) {
-    if (err.response) {
-      throw err.response.data;
-    } else if (err.request) {
-      throw err.request;
-    } else {
-      throw err;
-    }
-  }
+  return await client.post(validationURL, {
+    merchantIdentifier: merchantId,
+    displayName: merchantName,
+    initiative: 'web',
+    initiativeContext: domainName
+  });
 }

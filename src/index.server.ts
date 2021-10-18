@@ -1,6 +1,6 @@
 import { Agent } from 'https';
 import { readFileSync } from 'fs';
-import axios from 'axios';
+import { $fetch } from 'ohmyfetch';
 import { apiClientFactory } from '@vue-storefront/core';
 import * as api from './api';
 import { ClientInstance, Config } from './types';
@@ -24,9 +24,19 @@ const onCreate = (settings: Config): { config: Config; client: ClientInstance } 
     passphrase: config.certPassphrase
   })
 
-  const client = axios.create({
-    httpsAgent
-  });
+  const client = {
+    async post(url: string, body: any, options?: any) {
+      return $fetch(url, {
+        method: 'POST',
+        agent: httpsAgent,
+        ...options,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      });
+    }
+  };
 
   return {
     client,

@@ -1,7 +1,7 @@
 import { Agent } from 'https';
 import { readFileSync } from 'fs';
 import { $fetch } from 'ohmyfetch';
-import { apiClientFactory } from '@vue-storefront/core';
+import { apiClientFactory } from '@absolute-web/vsf-core';
 import * as api from './api';
 import { ClientInstance, Config } from './types';
 

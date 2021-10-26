@@ -9,7 +9,7 @@
 
 <script>
 import { ref, computed, onMounted } from "@vue/composition-api";
-import { useVSFContext } from "@vue-storefront/core";
+import { useVSFContext } from "@absolute-web/vsf-core";
 import { usePaymentSession } from "@absolute-web/vsf-apple-pay";
 
 const lineItemsToDisplay = ["subtotal", "shipping", "tax"];

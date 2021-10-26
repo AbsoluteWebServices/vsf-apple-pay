@@ -1,4 +1,4 @@
-import { Context } from '@vue-storefront/core';
+import { Context } from '@absolute-web/vsf-core';
 import { ApplePayPaymentSession, ApplePayPaymentSessionParams } from '../types';
 import { usePaymentSessionFactory, UsePaymentSessionFactoryParams } from '../factories/usePaymentSessionFactory';
 

@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from "@vue/composition-api";
+import { ref, computed, onMounted } from "vue-demi";
 import { useVSFContext } from "@absolute-web/vsf-core";
 import { usePaymentSession } from "@absolute-web/vsf-apple-pay";
 

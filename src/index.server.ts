@@ -33,7 +33,7 @@ const onCreate = (settings: Config): { config: Config; client: ClientInstance } 
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(body)
+        body
       });
     }
   };

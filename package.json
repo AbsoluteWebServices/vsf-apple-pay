@@ -1,6 +1,6 @@
 {
   "name": "@absolute-web/vsf-apple-pay",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "The Apple Pay payment module.",
   "main": "lib/index.cjs.js",
   "module": "lib/index.es.js",
@@ -33,7 +33,7 @@
   },
   "homepage": "https://github.com/AbsoluteWebServices/vsf-apple-pay#readme",
   "dependencies": {
-    "ohmyfetch": "^0.3.1"
+    "ohmyfetch": "^0.4.5"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^13.0.0",

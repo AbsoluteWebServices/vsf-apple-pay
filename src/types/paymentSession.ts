@@ -4,4 +4,5 @@ export interface ApplePayPaymentSession {
 
 export interface ApplePayPaymentSessionParams {
   validationURL: string;
+  domainName?: string;
 };

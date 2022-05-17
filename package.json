@@ -1,6 +1,6 @@
 {
   "name": "@absolute-web/vsf-apple-pay",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "The Apple Pay payment module.",
   "main": "lib/index.cjs.js",
   "module": "lib/index.es.js",

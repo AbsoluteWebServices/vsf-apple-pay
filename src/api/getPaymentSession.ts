@@ -15,6 +15,6 @@ export default async (
     merchantIdentifier: merchantId,
     displayName: merchantName,
     initiative: 'web',
-    initiativeContext: domainName
+    initiativeContext: params.domainName || domainName
   });
 }
